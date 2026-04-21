@@ -301,14 +301,13 @@
 /* Выравнивание таблицы статистики по правому краю */
 .stats-table th,
 .stats-table td {
-    text-align: right !important;
+    text-align: left !important;
 }
 
 .stats-table th:first-child,
 .stats-table td:first-child {
     text-align: left !important;
 }
-
 /* Центрирование карточек статистики */
 #statsClassContent .grid div,
 #statsOverallContent .grid div {
