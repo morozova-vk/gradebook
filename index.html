@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронный журнал</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+        extend: {
+            colors: {
+                brand: {
+                    50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                    400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                    800: '#3730a3', 900: '#312e81'
+                },
+                primary: {
+                    50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                    400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                    800: '#1e40af', 900: '#1e3a8a'
+                }
+            }
+        }
+    }
+}
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </div>
+                    <span class="text-lg font-bold text-slate-800 hidden sm:block">Электронный <span class="text-brand-600">журнал</span></span>
+                </div>
+                <!-- Tabs -->
+                <nav class="flex overflow-x-auto gap-1 no-scrollbar" id="mainTabs">
+                    <button onclick="switchTab('import')" data-tab="import" class="tab-btn active whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">📥 Загрузка</span><span class="sm:hidden">📥</span>
+                    </button>
+                    <button onclick="switchTab('journal')" data-tab="journal" class="tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">📓 Журнал</span><span class="sm:hidden">📓</span>
+                    </button>
+                    <button onclick="switchTab('stats')" data-tab="stats" class="tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">📊 Статистика</span><span class="sm:hidden">📊</span>
+                    </button>
+                    <button onclick="switchTab('graphs')" data-tab="graphs" class="tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">📈 Графики</span><span class="sm:hidden">📈</span>
+                    </button>
+                    <button onclick="switchTab('help')" data-tab="help" class="tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">❓ Справка</span><span class="sm:hidden">❓</span>
+                    </button>
+                    <button onclick="switchTab('about')" data-tab="about" class="tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium rounded-lg transition-all">
+                        <span class="hidden sm:inline">ℹ️ О программе</span><span class="sm:hidden">ℹ️</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 py-6">
+
+        <!-- ===== IMPORT TAB ===== -->
+        <section id="tab-import" class="tab-content">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-slate-800">Загрузка оценок</h1>
+                <p class="text-slate-500 mt-1">Загрузите данные из файлов CSV, TXT или XLSX</p>
+            </div>
+
+            <!-- Upload Mode Cards -->
+            <!-- Upload Mode Cards -->
+<!-- Upload Mode Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="import-mode-card bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-5 text-center hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer" onclick="triggerImportMode('classlist')" id="modeCardClasslist">
+        <div class="w-14 h-14 bg-indigo-50 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+            <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-800 mb-1">Список класса</h3>
+        <p class="text-xs text-slate-500">Только ФИО учеников без оценок</p>
+    </div>
+
+    <div class="import-mode-card bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-5 text-center hover:border-amber-400 hover:shadow-md transition-all cursor-pointer" onclick="triggerImportMode('grades')" id="modeCardGrades">
+        <div class="w-14 h-14 bg-amber-50 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+            <svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-800 mb-1">Оценки одного класса</h3>
+        <p class="text-xs text-slate-500">Данные одного класса: ФИО, предмет, даты и оценки</p>
+    </div>
+
+    <div class="import-mode-card bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-5 text-center hover:border-emerald-400 hover:shadow-md transition-all cursor-pointer" onclick="triggerImportMode('full')" id="modeCardFull">
+        <div class="w-14 h-14 bg-emerald-50 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+            <svg class="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-800 mb-1">Общий список</h3>
+        <p class="text-xs text-slate-500">Полные данные: Класс, предмет, ФИО, даты и оценка</p>
+    </div>
+</div>
+<!-- Выбор класса и предмета для импорта -->
+            <div id="importSelectors" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Класс</label>
+                    <select id="importClass" onchange="onImportClassChange()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[140px]"></select>
+                </div>
+                <div id="importNewClassWrap" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Название нового класса</label>
+                    <input type="text" id="importNewClassName" placeholder="Например: 9А" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="importSubjectWrap" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                    <select id="importSubject" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[180px]"></select>
+                </div>
+            </div>
+
+            <!-- Индикатор выбранного режима -->
+            <div id="importModeIndicator" class="hidden mb-4 px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"></div>
+
+<input type="file" id="importFileInput" accept=".csv,.txt,.xlsx" class="hidden" onchange="handleImportFileSelect(event)">
+
+                        <!-- Drop Zone -->
+            <div id="dropZone" class="border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-2xl p-8 text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer mb-6"
+                 onclick="document.getElementById('importFileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('border-indigo-500','bg-indigo-50/50')"
+                 ondragleave="this.classList.remove('border-indigo-500','bg-indigo-50/50')"
+                 ondrop="handleImportDrop(event)">
+                <div class="flex flex-col items-center gap-2">
+                    <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    <p class="text-slate-600 font-medium">Перетащите файл сюда или нажмите для выбора</p>
+                    <p class="text-xs text-slate-400" id="dropZoneHint">Сначала выберите режим загрузки выше</p>
+                    <div class="flex gap-2 mt-1">
+                        <span class="px-2 py-0.5 bg-white rounded text-xs text-slate-500 border">.csv</span>
+                        <span class="px-2 py-0.5 bg-white rounded text-xs text-slate-500 border">.txt</span>
+                        <span class="px-2 py-0.5 bg-white rounded text-xs text-slate-500 border">.xlsx</span>
+                    </div>
+                </div>
+            </div>
+
+<div class="flex flex-wrap gap-3 mb-6">
+    <button onclick="downloadSampleCSV('classlist')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📄 Пример: Список</button>
+    <button onclick="downloadEmptyTemplate('classlist')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📄 Шаблон: Список (пустой)</button>
+    
+    <button onclick="downloadSampleCSV('grades')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📊 Пример: Оценки</button>
+    <button onclick="downloadEmptyTemplate('grades')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📊 Шаблон: Оценки (пустой)</button>
+    
+    <button onclick="downloadSampleCSV('full')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📋 Пример: Полные данные</button>
+    <button onclick="downloadEmptyTemplate('full')" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">📋 Шаблон: Полные данные (пустой)</button>
+    
+    <button onclick="clearImportPreview()" id="clearImportBtn" class="hidden inline-flex items-center gap-2 px-4 py-2 bg-white border border-rose-200 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-all">✕ Очистить</button>
+</div>
+            <!-- Import Preview -->
+            <div id="importPreview" class="hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-slate-800">Предпросмотр данных</h2>
+                        <span id="importRowCount" class="text-sm text-slate-500"></span>
+                    </div>
+                    <div class="overflow-auto max-h-[400px]">
+                        <table class="w-full text-sm" id="importTable">
+                            <thead id="importTableHead" class="bg-slate-50 sticky top-0"></thead>
+                            <tbody id="importTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button onclick="importToJournal()" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm">
+                        ✓ Загрузить в журнал
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== JOURNAL TAB ===== -->
+        <section id="tab-journal" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Журнал</h1>
+                    <p class="text-slate-500 mt-1">Создание и редактирование записей</p>
+                </div>
+                <div class="flex flex-wrap gap-2 items-center">
+                    <button onclick="openAddClassModal()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Добавить класс
+                    </button>
+<button onclick="openDeleteClassModal()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-rose-200 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-all">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    Удалить класс
+</button>
+                    <button onclick="saveJournalToStorage()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                        Сохранить
+                    </button>
+                    <button onclick="exportJournalCSV()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all" title="Скачать данные оценок">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                        Скачать данные оценок
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-4 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Класс</label>
+                    <select id="journalClass" onchange="renderJournal()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[140px]"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                    <select id="journalSubject" onchange="renderJournal()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[180px]"></select>
+                </div>
+            </div>
+
+            <!-- Add Date -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-4">
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">Добавить дату урока</h3>
+                <div class="flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Дата</label>
+                        <input type="date" id="newDateInput" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Тема урока</label>
+                        <input type="text" id="newDateTopic" placeholder="Тема урока" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button onclick="addDate()" class="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm whitespace-nowrap">
+                        + Добавить дату
+                    </button>
+                </div>
+            </div>
+
+            <!-- Journal Table (Grid Notebook Style) -->
+            <div class="journal-notebook rounded-xl overflow-hidden mb-6 border border-slate-300">
+                <div class="overflow-auto max-h-[520px] journal-scroll" id="journalTableContainer">
+                    <table class="journal-table w-full text-sm" id="journalTable">
+                        <thead id="journalTableHead"></thead>
+                        <tbody id="journalTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Student Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Добавить ученика</h3>
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">ФИО ученика</label>
+                            <input type="text" id="newStudentName" placeholder="Иванов Иван Иванович" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="addStudent()" class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm whitespace-nowrap">
+                                + Добавить
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Оценки <span class="normal-case font-normal">(формат: ДД.ММ=оценка, через запятую)</span></label>
+                        <input type="text" id="newStudentGrades" placeholder="02.09=5, 04.09=4, 06.09=3" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-xs text-slate-400 mt-1">Пример: 02.09=5, 09.09=4, 16.09=3. Даты — дни уроков по выбранному предмету.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STATISTICS TABLE TAB ===== -->
+        <!-- ===== STATISTICS TABLE TAB ===== -->
+<section id="tab-stats" class="tab-content hidden">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">Статистика</h1>
+        <p class="text-slate-500 mt-1">Статистические данные в табличной форме</p>
+    </div>
+
+    <!-- Статистика по выбранному классу -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-sm">📊</span>
+            Статистика класса по предмету
+        </h2>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Класс</label>
+                <select id="statsClass" onchange="renderStatsTable()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px]"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                <select id="statsSubject" onchange="renderStatsTable()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px]"></select>
+            </div>
+        </div>
+        <div id="statsClassContent"></div>
+    </div>
+
+    <!-- Статистика по всем классам -->
+    <div>
+        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-sm">🌍</span>
+            Общая статистика по предмету (все классы)
+        </h2>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                <select id="statsOverallSubject" onchange="renderStatsTable()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px]"></select>
+            </div>
+        </div>
+        <div id="statsOverallContent"></div>
+    </div>
+</section>
+
+        <!-- ===== STATISTICS GRAPH TAB ===== -->
+        <!-- ===== STATISTICS GRAPH TAB ===== -->
+<section id="tab-graphs" class="tab-content hidden">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">Графики</h1>
+        <p class="text-slate-500 mt-1">Статистические данные в графической форме</p>
+    </div>
+
+    <!-- График по выбранному классу -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-sm">📊</span>
+            График класса по предмету
+        </h2>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Класс</label>
+                <select id="graphsClass" onchange="renderStatsGraphs()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[140px]"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                <select id="graphsSubject" onchange="renderStatsGraphs()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px]"></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- График по всем классам -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-sm">🌍</span>
+            Общий график по предмету (все классы)
+        </h2>
+        <div class="flex flex-wrap gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Предмет</label>
+                <select id="graphsOverallSubject" onchange="renderStatsGraphs()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[180px]"></select>
+            </div>
+        </div>
+    </div>
+
+    <div id="graphsContent" class="grid grid-cols-1 gap-6"></div>
+</section>
+
+        <!-- ===== HELP TAB ===== -->
+        <!-- ===== HELP TAB ===== -->
+<section id="tab-help" class="tab-content hidden">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">Справка</h1>
+        <p class="text-slate-500 mt-1">Описание и помощь по работе с приложением</p>
+    </div>
+    <div class="space-y-4" id="helpContent">
+        
+        <!-- Загрузка оценок -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="toggleHelp(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-lg">📥</span>
+                    <div>
+                        <h3 class="font-semibold text-slate-800">Загрузка оценок</h3>
+                        <p class="text-sm text-slate-500">Импорт данных из CSV, TXT, XLSX файлов</p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-slate-400 help-chevron transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="help-body hidden px-6 pb-5 pt-1">
+                <div class="text-sm text-slate-600 space-y-2">
+                    <p>Вкладка <strong>«Загрузка»</strong> предназначена для импорта данных из внешних файлов.</p>
+                    <p><strong>Три режима загрузки:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>Список класса</strong> — файл содержит только ФИО учеников (без оценок). Формат: одна колонка с ФИО или две — № и ФИО. Требуется указать класс.</li>
+                        <li><strong>Оценки одного класса</strong> — файл содержит ФИО, предмет и оценки по датам. Формат: <code>ФИО;Предмет;Дата;Оценка</code>. Требуется указать класс и предмет.</li>
+                        <li><strong>Общий список</strong> — файл содержит полную информацию: <code>Класс;Предмет;ФИО;Дата;Оценка</code>. Если поле "Класс" пустое, ученик ищется по ФИО во всех классах.</li>
+                    </ul>
+                    <p><strong>Поддерживаемые форматы:</strong> .csv, .txt, .xlsx</p>
+                    <p><strong>Даты:</strong> поддерживаются форматы <code>ДД.ММ</code> (год подставляется автоматически) и <code>ДД.ММ.ГГГГ</code>.</p>
+                    <p><strong>ФИО:</strong> должны быть полными (минимум 2 слова). Допускаются разные пробелы — они автоматически нормализуются.</p>
+                    <p>Вы можете скачать примеры и шаблоны файлов для каждого режима.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Журнал -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="toggleHelp(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-lg">📓</span>
+                    <div>
+                        <h3 class="font-semibold text-slate-800">Журнал</h3>
+                        <p class="text-sm text-slate-500">Просмотр и редактирование оценок</p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-slate-400 help-chevron transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="help-body hidden px-6 pb-5 pt-1">
+                <div class="text-sm text-slate-600 space-y-2">
+                    <p>Вкладка <strong>«Журнал»</strong> — основное рабочее пространство для работы с оценками.</p>
+                    <p><strong>Как пользоваться:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Выберите <strong>класс</strong> и <strong>предмет</strong> из выпадающих списков</li>
+                        <li>Таблица отображает: №, ФИО, средний балл и оценки по датам уроков</li>
+                        <li>Даты прокручиваются горизонтально</li>
+                        <li>Кликните на ячейку с оценкой, чтобы изменить её (2-5 или удалить)</li>
+                        <li>Кликните на ячейку с <strong>«+»</strong> в строке «Тема урока» или «Домашнее задание», чтобы добавить текст</li>
+                    </ul>
+                    <p><strong>Добавление ученика:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Введите ФИО в поле «ФИО ученика»</li>
+                        <li>Опционально введите оценки в формате: <code>ДД.ММ=оценка</code> (например: 02.09=5)</li>
+                        <li>Нажмите кнопку <strong>«+ Добавить»</strong></li>
+                    </ul>
+                    <p><strong>Добавление даты урока:</strong> выберите дату и тему, нажмите <strong>«+ Добавить дату»</strong></p>
+                    <p><strong>Управление классом:</strong> кнопки <strong>«Добавить класс»</strong> и <strong>«Удалить класс»</strong></p>
+                    <p><strong>Сохранение и экспорт:</strong> нажмите «Сохранить» для сохранения в браузере или «Скачать данные оценок» для экспорта в CSV</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика (таблицы) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="toggleHelp(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-lg">📊</span>
+                    <div>
+                        <h3 class="font-semibold text-slate-800">Статистика (таблицы)</h3>
+                        <p class="text-sm text-slate-500">Числовые показатели успеваемости</p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-slate-400 help-chevron transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="help-body hidden px-6 pb-5 pt-1">
+                <div class="text-sm text-slate-600 space-y-2">
+                    <p>Вкладка <strong>«Статистика»</strong> показывает анализ успеваемости в табличной форме.</p>
+                    <p><strong>Два независимых блока:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>Статистика класса по предмету</strong> — выберите класс и предмет, отобразится информация по выбранной группе</li>
+                        <li><strong>Общая статистика по предмету (все классы)</strong> — выберите только предмет, отобразятся данные по всем классам</li>
+                    </ul>
+                    <p>Для каждого блока показывается: средний балл, медиана, количество и процент оценок (2-5).</p>
+                    <p>Шкала оценок: 2 (неудовл.), 3 (удовл.), 4 (хорошо), 5 (отлично).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Графики -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="toggleHelp(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-lg">📈</span>
+                    <div>
+                        <h3 class="font-semibold text-slate-800">Графики</h3>
+                        <p class="text-sm text-slate-500">Визуализация статистических данных</p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-slate-400 help-chevron transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="help-body hidden px-6 pb-5 pt-1">
+                <div class="text-sm text-slate-600 space-y-2">
+                    <p>Вкладка <strong>«Графики»</strong> отображает статистику в виде столбчатых диаграмм.</p>
+                    <p><strong>Два независимых графика:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>График класса по предмету</strong> — выберите класс и предмет</li>
+                        <li><strong>Общий график по предмету (все классы)</strong> — выберите только предмет</li>
+                    </ul>
+                    <p>Цветовая кодировка:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li><span class="text-emerald-600">🟢 5 (отлично)</span></li>
+                        <li><span class="text-blue-600">🔵 4 (хорошо)</span></li>
+                        <li><span class="text-amber-600">🟡 3 (удовлетворительно)</span></li>
+                        <li><span class="text-rose-600">🔴 2 (неудовлетворительно)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- О программе (кратко) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="toggleHelp(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-lg">ℹ️</span>
+                    <div>
+                        <h3 class="font-semibold text-slate-800">О приложении</h3>
+                        <p class="text-sm text-slate-500">Технологии и возможности</p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-slate-400 help-chevron transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="help-body hidden px-6 pb-5 pt-1">
+                <div class="text-sm text-slate-600 space-y-2">
+                    <p><strong>Электронный журнал</strong> — система для учёта успеваемости учеников школы.</p>
+                    <p><strong>Основные возможности:</strong></p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Импорт данных из CSV, TXT, XLSX файлов (3 режима)</li>
+                        <li>Автоматическая нормализация ФИО (разные пробелы, невидимые символы)</li>
+                        <li>Ведение журнала с темами уроков и домашними заданиями</li>
+                        <li>Статистика в табличной и графической форме</li>
+                        <li>Автосохранение в localStorage браузера</li>
+                        <li>Экспорт данных в CSV</li>
+                    </ul>
+                    <p><strong>Технологии:</strong> HTML, CSS (Tailwind), JavaScript, Chart.js, XLSX</p>
+                    <p><strong>Версия:</strong> 1.0 (2025)</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+        <!-- ===== ABOUT TAB ===== -->
+        <section id="tab-about" class="tab-content hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-slate-800">О программе</h1>
+                <p class="text-slate-500 mt-1">Информация о разработчике</p>
+            </div>
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-500 px-8 py-12 text-center">
+                        <img src="my-photo.jpg" alt="Фото разработчика" class="w-28 h-28 rounded-full mx-auto border-4 border-white/30 object-cover shadow-lg mb-4">
+                        <h2 class="text-2xl font-bold text-white">Морозова Виктория Алексеевна</h2>
+                        <p class="text-indigo-200 mt-1">Разработчик приложения</p>
+                    </div>
+                    <div class="px-8 py-6 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">ФИО</p>
+                                <p class="text-slate-800 font-medium">Морозова Виктория Алексеевна</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Курс и группа</p>
+                                <p class="text-slate-800 font-medium">3 курс, группа БС-303</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Учебное заведение</p>
+                                <p class="text-slate-800 font-medium">СибГУТИ</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Телефон</p>
+                                <p class="text-slate-800 font-medium">8-996-380-79-37</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Email</p>
+                                <p class="text-slate-800 font-medium">morozova.va@stud.sibsutis.ru</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-2">О приложении</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        <strong>Электронный журнал</strong> — электронный журнал для учета успеваемости учеников школы.
+                        Приложение позволяет импортировать оценки из файлов, вести журнал, анализировать
+                        статистику в табличной и графической форме. Данные сохраняются локально в браузере.
+                    </p>
+                    <p class="text-sm text-slate-500 mt-2">Технологии: HTML, CSS, JavaScript</p>
+                    <div class="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                        <span>Версия 1.0</span>
+                        <span>•</span>
+                        <span>2025</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Student Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-800">Редактировать студента</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">ФИО</label>
+                    <input type="text" id="editStudentName" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="editGradesContainer" class="space-y-2"></div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">Отмена</button>
+                <button onclick="saveEditStudent()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Class Modal -->
+    <div id="addClassModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-800">Добавить класс</h3>
+                <button onclick="closeAddClassModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Название класса</label>
+                    <input type="text" id="newClassName" placeholder="Например: 9А" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Список учеников (по одному на строку)</label>
+                    <textarea id="newClassStudents" rows="6" placeholder="Иванов Иван Иванович&#10;Петрова Мария Сергеевна&#10;Сидоров Алексей Николаевич" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+                </div>
+                <p class="text-xs text-slate-400">Или загрузите файл со списком:</p>
+                <input type="file" id="addClassFileInput" accept=".csv,.txt,.xlsx" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="handleAddClassFile(event)">
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button onclick="closeAddClassModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">Отмена</button>
+                <button onclick="confirmAddClass()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all">Создать класс</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Modal -->
+    <div id="gradeModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h3 class="text-lg font-semibold text-slate-800">Поставить оценку</h3>
+                <p id="gradeModalInfo" class="text-sm text-slate-500 mt-1"></p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-5 gap-3">
+                    <button onclick="setGrade(5)" data-grade="5" class="grade-pick-btn py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-lg rounded-xl transition-all ring-emerald-500">5</button>
+                    <button onclick="setGrade(4)" data-grade="4" class="grade-pick-btn py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-lg rounded-xl transition-all ring-blue-500">4</button>
+                    <button onclick="setGrade(3)" data-grade="3" class="grade-pick-btn py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-lg rounded-xl transition-all ring-amber-500">3</button>
+                    <button onclick="setGrade(2)" data-grade="2" class="grade-pick-btn py-3 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-lg rounded-xl transition-all ring-rose-500">2</button>
+                    <button onclick="setGrade(0)" data-grade="0" class="grade-pick-btn py-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-bold text-lg rounded-xl transition-all ring-slate-400">✕</button>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeGradeModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topic Modal -->
+    <div id="topicModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h3 id="topicModalTitle" class="text-lg font-semibold text-slate-800"></h3>
+                <p id="topicModalDate" class="text-sm text-slate-500 mt-1"></p>
+            </div>
+            <div class="p-6">
+                <input type="text" id="topicInput" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Введите текст...">
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button onclick="closeTopicModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">Отмена</button>
+                <button onclick="saveTopicEdit()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+        <div id="toastContent" class="px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2"></div>
+    </div>
+
+    <script src="script.js"></script>
+<script>console.log("JavaScript работает");</script>
+<!-- Delete Class Modal -->
+<div id="deleteClassModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-slate-800">Удалить класс</h3>
+            <button onclick="closeDeleteClassModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Выберите класс для удаления</label>
+            <select id="deleteClassSelect" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></select>
+            <p class="text-xs text-rose-500">Внимание! Все данные класса (ученики и оценки) будут удалены без возможности восстановления.</p>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+            <button onclick="closeDeleteClassModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">Отмена</button>
+            <button onclick="confirmDeleteClass()" class="px-6 py-2 bg-rose-600 text-white rounded-xl text-sm font-semibold hover:bg-rose-700 transition-all">Удалить</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
