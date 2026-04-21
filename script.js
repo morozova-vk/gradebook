@@ -1,7 +1,3 @@
-// =============================================================================
-// GRADEBOOK PRO — Основной скрипт приложения
-// =============================================================================
-
 // ===== МОДЕЛЬ ДАННЫХ =====
 const APP_DATA = {
     classes: [],
@@ -59,7 +55,6 @@ function initDemoData() {
     }
 }
 
-
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 function init() {
     loadFromStorage();
@@ -68,7 +63,6 @@ function init() {
     populateAllDropdowns();
     renderJournal();
 }
-
 document.addEventListener('DOMContentLoaded', init);
 
 // ===== ХРАНИЛИЩЕ =====
@@ -950,8 +944,6 @@ function processImportFile(file) {
     }
 }
 
-
-
 function clearImportPreview() {
     importedData = null;
     document.getElementById('importPreview').classList.add('hidden');
@@ -960,8 +952,6 @@ function clearImportPreview() {
 }
 
 function importToJournal() {
-
-
     if (!importedData || !importMode) {
         showToast('Нет данных для загрузки', 'error');
         return;
@@ -970,7 +960,6 @@ function importToJournal() {
     const headers = importedData[0] || [];
     const rows = importedData.slice(1);
     const firstRowHeaders = headers.map(h => String(h).toLowerCase());
-    
     let className = document.getElementById('importClass').value;
     
     // ---- РЕЖИМ: Список класса (только ФИО, только полные) ----
@@ -1076,15 +1065,10 @@ if (importMode === 'classlist') {
         showToast(`Не добавлено ни одного ученика. Проверьте формат файла (требуется ФИО полностью).`, 'error');
     }
 }
-
-
-    
     // ---- РЕЖИМ: Оценки одного класса (ищем по полному ФИО) ----
-
    else if (importMode === 'grades') {
     // Берем класс из выпадающего списка импорта
     let targetClass = document.getElementById('importClass').value;
-    
     // Проверка: выбран ли класс
     if (!targetClass || targetClass === '__new__') { 
         showToast('Выберите существующий класс из списка', 'error'); 
@@ -1112,19 +1096,14 @@ if (importMode === 'classlist') {
         name = name.replace(/^\uFEFF/, '');
         // Убираем номер в начале если есть (например "1;Иванов")
         name = name.replace(/^\d+[\.\)\s;]+/, '').trim();
-        
         // Предмет (вторая колонка)
         const subjectFromFile = String(row[1]).trim();
-        
         // Дата (третья колонка)
         const dateStrRaw = String(row[2]).trim();
-        
         // Оценка (четвертая колонка)
         const grade = parseInt(row[3]);
-        
         // Проверка что предмет совпадает с выбранным
         if (subjectFromFile !== subj) continue;
-        
         // Парсим дату
         let dateStr = parseDateFromInput(dateStrRaw);
         if (!dateStr) {
@@ -1146,10 +1125,8 @@ if (importMode === 'classlist') {
         }
         
         if (isNaN(grade) || grade < 2 || grade > 5) continue;
-        
         // Ищем ученика
         let student = data.students.find(s => normalizeString(s.name) === normalizeString(name));
-        
         // Если не нашли точно, пробуем по первым двум словам
         if (!student) {
             const nameParts = name.split(/\s+/);
@@ -1163,7 +1140,6 @@ if (importMode === 'classlist') {
             notFoundCount++;
             continue;
         }
-        
         // Добавляем оценку
         if (!student.grades[dateStr]) gradesAdded++;
         student.grades[dateStr] = grade;
@@ -1194,7 +1170,6 @@ if (importMode === 'classlist') {
     }
 }
     
-
 // ---- РЕЖИМ: Общий список (полный формат: Класс;Предмет;ФИО;Дата;Оценка) ----
 else if (importMode === 'full') {
     let gradesAdded = 0;
@@ -1455,8 +1430,6 @@ function exportJournalCSV() {
     URL.revokeObjectURL(link.href);
     showToast('Данные экспортированы', 'success');
 }
-
-// ===== СТАТИСТИКА =====
 // ===== СТАТИСТИКА =====
 function renderStatsTable() {
     const clsVal = document.getElementById('statsClass')?.value;
